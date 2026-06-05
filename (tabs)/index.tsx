@@ -1,25 +1,30 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, SafeAreaView } from 'react-native';
 import { useTasks } from '../contexts/TaskContext';
-import { TaskItem } from '../../components/TaskItem';
+import { TaskItem } from '../../components/TaskItem'; // Caminho relativo direto garantido
+import { useTheme } from '../contexts/ThemeContext';
 import { useRouter } from 'expo-router';
 
 export default function TasksList() {
   const router = useRouter();
   const { tasks, toggleTask, deleteTask } = useTasks();
+  const { colors } = useTheme();
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
       <View style={styles.container}>
         
         <View style={styles.header}>
-          <Text style={styles.title}>Atividades</Text>
+          <Text style={[styles.title, { color: colors.text }]}>Atividades</Text>
         </View>
 
         <FlatList 
           data={tasks}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={tasks.length === 0 ? styles.emptyContainer : styles.listContainer}
+          contentContainerStyle={[
+            tasks.length === 0 ? styles.emptyContainer : styles.listContainer,
+            { backgroundColor: 'transparent' }
+          ]}
           renderItem={({ item }) => (
             <TaskItem 
               task={item} 
@@ -33,12 +38,11 @@ export default function TasksList() {
           )}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>Nenhuma Atividade Pendente</Text>
+            <Text style={[styles.emptyText, { color: colors.subtext }]}>Nenhuma Atividade Pendente</Text>
           }
         />
 
-        {/* Botão Inferior Conforme a Imagem de Design Original */}
-        <TouchableOpacity style={styles.floatingButton} onPress={() => router.push('/modal')}>
+        <TouchableOpacity style={[styles.floatingButton, { backgroundColor: colors.accent }]} onPress={() => router.push('/modal')}>
           <Text style={styles.floatingButtonText}>+ Adicionar Nova Tarefa</Text>
         </TouchableOpacity>
       </View>
@@ -47,15 +51,14 @@ export default function TasksList() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: '#000' },
+  safeArea: { flex: 1 },
   container: { flex: 1, paddingHorizontal: 20, paddingBottom: 20 },
   header: { marginTop: 40, marginBottom: 20 },
-  title: { fontSize: 32, fontWeight: 'bold', color: '#FFF' },
+  title: { fontSize: 32, fontWeight: 'bold' },
   listContainer: { paddingBottom: 100 },
   emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 },
-  emptyText: { color: '#9CA3AF', fontSize: 16, textAlign: 'center' },
+  emptyText: { fontSize: 16, textAlign: 'center' },
   floatingButton: { 
-    backgroundColor: '#3B82F6', 
     padding: 16, 
     borderRadius: 14, 
     alignItems: 'center', 
@@ -64,10 +67,6 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
     elevation: 5
   },
   floatingButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' }

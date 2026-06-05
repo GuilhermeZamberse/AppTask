@@ -3,10 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Aler
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext'; // Importado para controle dinâmico
 
 export default function LoginScreen() {
   const router = useRouter();
   const { loginUser } = useAuth();
+  const { colors } = useTheme(); // Consumindo as cores dinâmicas
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -26,25 +29,25 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.brandContainer}>
-        <View style={styles.logoIcon}>
+        <View style={[styles.logoIcon, { backgroundColor: colors.accent }]}>
           <Feather name="check-square" size={32} color="#FFF" />
         </View>
-        <Text style={styles.brandName}>AppTask</Text>
-        <Text style={styles.brandSubtitle}>Gerencie suas tarefas com facilidade</Text>
+        <Text style={[styles.brandName, { color: colors.text }]}>AppTask</Text>
+        <Text style={[styles.brandSubtitle, { color: colors.subtext }]}>Gerencie suas tarefas com facilidade</Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Entrar</Text>
+      <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Entrar</Text>
 
-        <Text style={styles.label}>E-mail</Text>
-        <View style={styles.inputContainer}>
-          <Feather name="mail" size={18} color="#9CA3AF" style={styles.inputIcon} />
+        <Text style={[styles.label, { color: colors.text }]}>E-mail</Text>
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
+          <Feather name="mail" size={18} color={colors.subtext} style={styles.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="seu@email.com"
-            placeholderTextColor="#4B5563"
+            placeholderTextColor={colors.subtext}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -52,28 +55,28 @@ export default function LoginScreen() {
           />
         </View>
 
-        <Text style={styles.label}>Senha</Text>
-        <View style={styles.inputContainer}>
-          <Feather name="lock" size={18} color="#9CA3AF" style={styles.inputIcon} />
+        <Text style={[styles.label, { color: colors.text }]}>Senha</Text>
+        <View style={[styles.inputContainer, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
+          <Feather name="lock" size={18} color={colors.subtext} style={styles.inputIcon} />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="........"
-            placeholderTextColor="#4B5563"
+            placeholderTextColor={colors.subtext}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity style={[styles.button, { backgroundColor: colors.accent }]} onPress={handleLogin}>
           <Text style={styles.buttonText}>Entrar</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Não tem conta? </Text>
+        <Text style={[styles.footerText, { color: colors.subtext }]}>Não tem conta? </Text>
         <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-          <Text style={styles.footerLink}>Cadastre-se</Text>
+          <Text style={[styles.footerLink, { color: colors.accent }]}>Cadastre-se</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -81,20 +84,20 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000', justifyContent: 'center', paddingHorizontal: 24 },
+  container: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
   brandContainer: { alignItems: 'center', marginBottom: 32 },
-  logoIcon: { width: 64, height: 64, backgroundColor: '#3B82F6', borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
-  brandName: { fontSize: 32, fontWeight: 'bold', color: '#FFF', marginBottom: 4 },
-  brandSubtitle: { fontSize: 14, color: '#9CA3AF' },
-  card: { backgroundColor: '#111315', borderRadius: 20, padding: 24, borderWidth: 1, borderColor: '#1F2225' },
-  cardTitle: { fontSize: 22, fontWeight: 'bold', color: '#FFF', marginBottom: 24 },
-  label: { fontSize: 14, color: '#FFF', marginBottom: 8, fontWeight: '500' },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1A1D1F', borderRadius: 12, borderWidth: 1, borderColor: '#2A2F33', marginBottom: 20, paddingHorizontal: 14 },
+  logoIcon: { width: 64, height: 64, borderRadius: 16, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  brandName: { fontSize: 32, fontWeight: 'bold', marginBottom: 4 },
+  brandSubtitle: { fontSize: 14 },
+  card: { borderRadius: 20, padding: 24, borderWidth: 1 },
+  cardTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 24 },
+  label: { fontSize: 14, marginBottom: 8, fontWeight: '500' },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', borderRadius: 12, borderWidth: 1, marginBottom: 20, paddingHorizontal: 14 },
   inputIcon: { marginRight: 10 },
-  input: { flex: 1, color: '#FFF', height: 48, fontSize: 15 },
-  button: { backgroundColor: '#2E4485', borderRadius: 12, height: 48, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
+  input: { flex: 1, height: 48, fontSize: 15 },
+  button: { borderRadius: 12, height: 48, justifyContent: 'center', alignItems: 'center', marginTop: 8 },
   buttonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 24 },
-  footerText: { color: '#9CA3AF', fontSize: 14 },
-  footerLink: { color: '#3B82F6', fontSize: 14, fontWeight: '600' },
+  footerText: { fontSize: 14 },
+  footerLink: { fontSize: 14, fontWeight: '600' },
 });

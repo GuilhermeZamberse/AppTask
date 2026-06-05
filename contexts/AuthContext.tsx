@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 interface User {
   name: string;
   email: string;
-  password?: string; // Armazenamos temporariamente para validação
+  password?: string;
 }
 
 interface AuthContextData {
@@ -12,6 +12,7 @@ interface AuthContextData {
   registerUser: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
   loginUser: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
   logoutUser: () => Promise<void>;
+  updateUserName: (newName: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -27,13 +28,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loadSavedUser();
   }, []);
 
-  // REGRA: Apenas salva o usuário na lista de cadastrados, NÃO loga ele direto
   const registerUser = async (name: string, email: string, password: string) => {
     try {
       const savedUsers = await AsyncStorage.getItem('@AppTask:registered_users');
       const usersList: User[] = savedUsers ? JSON.parse(savedUsers) : [];
 
-      // Verifica se o e-mail já está cadastrado
       const userExists = usersList.find(u => u.email.toLowerCase() === email.toLowerCase());
       if (userExists) {
         return { success: false, message: 'Este e-mail já está cadastrado!' };
@@ -49,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // REGRA: Só permite entrar se o e-mail e a senha baterem com alguém da lista
   const loginUser = async (email: string, password: string) => {
     try {
       const savedUsers = await AsyncStorage.getItem('@AppTask:registered_users');
@@ -63,14 +61,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: false, message: 'E-mail ou senha incorretos / Usuário não cadastrado.' };
       }
 
-      // Salva apenas os dados públicos do usuário logado
       const loggedUserData = { name: foundUser.name, email: foundUser.email };
       setUser(loggedUserData);
       await AsyncStorage.setItem('@AppTask:logged_user', JSON.stringify(loggedUserData));
       
       return { success: true, message: 'Logado com sucesso!' };
     } catch (error) {
-      return { success: false, message: 'Erro ao efetuar login.' };
+      return { success: false, message: 'Erro ao efetuuar login.' };
     }
   };
 
@@ -79,8 +76,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await AsyncStorage.removeItem('@AppTask:logged_user');
   };
 
+  const updateUserName = async (newName: string) => {
+    if (!user || !newName.trim()) return;
+
+    try {
+      // 1. Atualiza a sessão ativa do usuário no estado e armazenamento local
+      const updatedLoggedUser = { ...user, name: newName };
+      setUser(updatedLoggedUser);
+      await AsyncStorage.setItem('@AppTask:logged_user', JSON.stringify(updatedLoggedUser));
+
+      // 2. Persiste a alteração do nome na lista de cadastrados gerais
+      const savedUsers = await AsyncStorage.getItem('@AppTask:registered_users');
+      if (savedUsers) {
+        const usersList: User[] = JSON.parse(savedUsers);
+        const updatedList = usersList.map(u => 
+          u.email.toLowerCase() === user.email.toLowerCase() ? { ...u, name: newName } : u
+        );
+        await AsyncStorage.setItem('@AppTask:registered_users', JSON.stringify(updatedList));
+      }
+    } catch (error) {
+      console.log('Erro ao atualizar o nome:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, registerUser, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, registerUser, loginUser, logoutUser, updateUserName }}>
       {children}
     </AuthContext.Provider>
   );
